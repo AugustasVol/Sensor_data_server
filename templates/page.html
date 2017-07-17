@@ -1,0 +1,121 @@
+<html>
+<head>
+
+<title>Data</title>
+
+<style>
+.top_panel {
+    width: 100%;
+	background-color: rgb(230,230,230);
+}
+canvas.table_canvas {
+	width: 100%;
+	height: 10;
+}
+h1 {
+    font-family: arial;
+    font-size:300%;
+    text-align: center;
+}
+p#alert {
+    font-family: arial;
+    font-size:200%;
+    text-align:center;
+    margin-top:30px;
+}
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: center;
+    padding: 10px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+</style>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+<div class="top_panel">
+    <h1>Sensor data</h1>
+</div>
+
+<p id="alert"></p>
+<canvas class="table_canvas"></canvas>
+
+{{table|safe}}
+
+<script>
+	function change_value_color(value, table_data_object, threshold_value) {
+
+		table_data_object.innerHTML = value;
+
+		if (value < threshold_value) {
+				table_data_object.style.backgroundColor = "red";
+			}
+		else {
+				table_data_object.style.backgroundColor = "initial"
+			}
+	}
+    function use_api(id, table_data_object, threshold_value) {
+        $.ajax({
+        	type: "GET",
+        	url: document.URL +id, 
+        	success: function(data, status){
+            //use api features JSON must have "data" and "head"
+            	const server_value = data["data"];
+            	change_value_color(server_value, table_data_object, threshold_value)
+        	},
+
+        	error: function() {
+                var alert = document.getElementById("alert")
+                alert.innerHTML = "Refresh"
+        	}
+        })
+    }
+	function update_table(table_class){
+		if (table_class == undefined)	{
+			table_class = "dataframe";
+		}
+
+		table = document.getElementsByClassName(table_class)[0] //because class not id
+		row_length = table.rows.length;
+		column_length = table.rows[0].cells.length;
+		value_column = column_length - 1;
+		threshold_column = column_length - 2;
+
+		for (i = 1; i < row_length; i++) {
+			api_id = table.rows[i].cells[0];
+
+			table_data_object = table.rows[i].cells[value_column];
+			
+			threshold_value = table.rows[i].cells[threshold_column].innerHTML;
+
+			use_api(api_id, table_data_object, threshold_value);
+			
+			
+		}
+	} 
+
+	const class_name = "dataframe"
+    update_table(class_name)
+
+	setInterval(update_table, 1000, class_name)
+
+</script>
+
+</body>
+
+
+
+</html>

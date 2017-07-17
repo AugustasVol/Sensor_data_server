@@ -1,0 +1,2 @@
+id,Name,threshold,value,port
+usb,metalas,500,0,/dev/ttyUSB0
