@@ -23,7 +23,7 @@ def index():
 @app.route('/<id>', methods = ['GET'])
 def return_values(id):
 
-    data = {"data":10}	
+    data = {"data":500}	
     return jsonify(data)
 
 

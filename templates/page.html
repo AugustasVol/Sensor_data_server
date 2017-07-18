@@ -3,9 +3,7 @@
 
 <title>Data</title>
 
-<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
-<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 <style>
 
@@ -20,6 +18,27 @@ p#alert {
     font-size:200%;
     text-align:center;
     margin-top:30px;
+}
+button {
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    width: 100%;
+    height: 5%;
+    margin: 10px 1px;
+}
+.button1 {
+    background-color: gray; 
+    color: white; 
+    border: 2px solid gray;
+}
+.button1:hover {
+    background-color: white;
+    color: black;
 }
 table {
     font-family: arial, sans-serif;
@@ -55,10 +74,8 @@ tr:nth-child(even) {
 
 {{table|safe}}
 
+<button class="button button1">Green</button>
 
-<div data-role="footer" data-position="fixed">
-    <h1>Sensor data</h1>
-</div>
 
 <script>
 	const class_name = "dataframe";
@@ -91,10 +108,12 @@ tr:nth-child(even) {
         	}
         })
     }
+
 	function update_table(table_class){
 		if (table_class == undefined)	{
 			table_class = "dataframe";
 		}
+
 
 		table = document.getElementsByClassName(table_class)[0] //because class not id
 		row_length = table.rows.length;
@@ -110,6 +129,7 @@ tr:nth-child(even) {
 			table_row_object = table.rows[i];
 			
 			threshold_value = table.rows[i].cells[threshold_column].innerHTML;
+			console.log(threshold_value);
 
 			use_api(api_id,table_data_object, table_row_object, threshold_value);
 			
@@ -117,7 +137,7 @@ tr:nth-child(even) {
 		}
 	} 
     update_table(class_name)
-
+    console.log("hello")
 	setInterval(update_table, 1000, class_name)
 
 </script>
