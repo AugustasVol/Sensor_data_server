@@ -3,15 +3,13 @@
 
 <title>Data</title>
 
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
 <style>
-.top_panel {
-    width: 100%;
-	background-color: rgb(230,230,230);
-}
-canvas.table_canvas {
-	width: 100%;
-	height: 10;
-}
+
+
 h1 {
     font-family: arial;
     font-size:300%;
@@ -41,40 +39,50 @@ tr:nth-child(even) {
 </style>
 
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
 
 </head>
 
 <body>
-<div class="top_panel">
-    <h1>Sensor data</h1>
-</div>
+
+<h1>Sensor data</h1>
+
+
 
 <p id="alert"></p>
-<canvas class="table_canvas"></canvas>
+
+
 
 {{table|safe}}
 
+
+<div data-role="footer" data-position="fixed">
+    <h1>Sensor data</h1>
+</div>
+
 <script>
-	function change_value_color(value, table_data_object, threshold_value) {
+	const class_name = "dataframe";
+	const table_cell_color = "#f46849"
+
+	function change_value_color(value,table_data_object, table_row_object, threshold_value) {
 
 		table_data_object.innerHTML = value;
 
 		if (value < threshold_value) {
-				table_data_object.style.backgroundColor = "red";
+				table_row_object.style.backgroundColor = table_cell_color;
 			}
 		else {
-				table_data_object.style.backgroundColor = "initial"
+				table_row_object.style.backgroundColor = "initial";
 			}
 	}
-    function use_api(id, table_data_object, threshold_value) {
+    function use_api(id,table_data_object, table_row_object, threshold_value) {
         $.ajax({
         	type: "GET",
         	url: document.URL +id, 
         	success: function(data, status){
             //use api features JSON must have "data" and "head"
             	const server_value = data["data"];
-            	change_value_color(server_value, table_data_object, threshold_value)
+            	change_value_color(server_value,table_data_object, table_row_object, threshold_value)
         	},
 
         	error: function() {
@@ -98,16 +106,16 @@ tr:nth-child(even) {
 			api_id = table.rows[i].cells[0];
 
 			table_data_object = table.rows[i].cells[value_column];
+
+			table_row_object = table.rows[i];
 			
 			threshold_value = table.rows[i].cells[threshold_column].innerHTML;
 
-			use_api(api_id, table_data_object, threshold_value);
+			use_api(api_id,table_data_object, table_row_object, threshold_value);
 			
 			
 		}
 	} 
-
-	const class_name = "dataframe"
     update_table(class_name)
 
 	setInterval(update_table, 1000, class_name)
