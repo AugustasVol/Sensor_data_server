@@ -15,7 +15,7 @@ h1 {
 }
 p#alert {
     font-family: arial;
-    font-size:200%;
+    font-size:300%;
     text-align:center;
     margin-top:30px;
 }
@@ -24,37 +24,63 @@ button {
     color: white;
     text-align: center;
     text-decoration: none;
-    display: inline-block;
-    transition-duration: 0.4s;
+
+    transition-duration: 0.2s;
     cursor: pointer;
-    width: 100%;
-    height: 5%;
-    margin: 10px 1px;
+    border-radius: 4px;
 }
-.button1 {
+.hide_button {
+	font-size: 150%;
+	height: 10%;
+	width: 100%;
     background-color: gray; 
     color: white; 
     border: 2px solid gray;
+    margin: 10px 1px;
 }
-.button1:hover {
+.hide_button:hover {
     background-color: white;
     color: black;
 }
+.table_button {
+
+	height: 100%;
+	width: 100%;
+	font-size: 100%;
+	height: 100%;
+	background-color:#ffcc00;
+}
+.table_button:hover {
+    background-color: white;
+    color: black;
+}
+
+input {
+	margin: 10px 1px;
+	text-align: center;
+	font-size: 130%;
+	width: 100%;
+	height: 10%;
+	transition: width 0.4s ease-in-out;
+}
+
+
 table {
+	font-size: 150%;
     font-family: arial, sans-serif;
     border-collapse: collapse;
     width: 100%;
 }
 
+
 td, th {
-    border: 1px solid #dddddd;
+	padding: 10;
     text-align: center;
-    padding: 10px;
+    border-bottom: 1px solid #ddd;
+
 }
 
-tr:nth-child(even) {
-    background-color: #dddddd;
-}
+
 </style>
 
 
@@ -69,20 +95,81 @@ tr:nth-child(even) {
 
 
 <p id="alert"></p>
+<!-- tables done with jinja2 -->
+<table id="dataframe">
+	<thead>
+		
+		{% for header in dataframe.columns %}
+			<th>{{header}}</th>
+		{% endfor %}
+		<th class="hidden" hidden>Change</th>
+	</thead>
+	<tbody>
+		{% for row in dataframe.values %}
+			<tr>
+				{%set id = row[0]%}
+				
 
+				{%for cell in row%}
+					<td>{{cell}}</td>
+				{% endfor %}
+				<td class="hidden"  hidden>
+					<button class="table_button" onclick="get_and_change('{{id}}')">{{id}}</button>
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
 
+<div class="hidden" hidden>
+<input type="number" id="hidden_input" placeholder="Number">
+</div>
 
-{{table|safe}}
+{%set threshold_column = dataframe.columns[-2]%}
+<button class="hide_button" onclick="$('.hidden').toggle()">Change {{threshold_column}}</button>
 
-<button class="button button1">Green</button>
 
 
 <script>
-	const class_name = "dataframe";
-	const table_cell_color = "#f46849"
+	const table_id = "dataframe";
+	const table_cell_color = "#f46849";
+	const table = document.getElementById(table_id); 
+	const row_length = table.rows.length;
+	const column_length = table.rows[0].cells.length;
+	const value_column = column_length - 2;
+	const threshold_column = column_length - 3;
+	const id_column = 0;
+	const name_column = 1;
 
+	//var id_array = [];
+	//for (i = 1; i < row_length; ++i) {
+	//	id_array.push(table.rows[i].cells[id_column].innerHTML)
+	//}
+	//console.log(id_array)
+	hidden_input_id = "hidden_input"
+	hidden_input_object = document.getElementById(hidden_input_id)
+	function show_or_hide(id) {
+
+	} 
+	function get_and_change(id) {
+		value = Number(hidden_input_object.value);
+		console.log(value);
+		change_threshold(value, id);
+	}
+	function change_threshold(threshold_value, id) {
+		var table_id = "undefined";
+		var table_row = "undefined";
+		for (i = 1;(table_id != id) && (i < row_length); ++i) {
+			console.log(table_id);
+			console.log(table_row);
+			table_row = table.rows[i]
+			table_id = table_row.cells[id_column].innerHTML
+		}
+		table_row.cells[threshold_column].innerHTML = threshold_value
+
+	}
 	function change_value_color(value,table_data_object, table_row_object, threshold_value) {
-
+		console.log(value);
 		table_data_object.innerHTML = value;
 
 		if (value < threshold_value) {
@@ -109,36 +196,26 @@ tr:nth-child(even) {
         })
     }
 
-	function update_table(table_class){
-		if (table_class == undefined)	{
-			table_class = "dataframe";
-		}
+	function update_table(){
 
-
-		table = document.getElementsByClassName(table_class)[0] //because class not id
-		row_length = table.rows.length;
-		column_length = table.rows[0].cells.length;
-		value_column = column_length - 1;
-		threshold_column = column_length - 2;
 
 		for (i = 1; i < row_length; i++) {
-			api_id = table.rows[i].cells[0];
+			api_id = table.rows[i].cells[id_column].innerHTML;
 
 			table_data_object = table.rows[i].cells[value_column];
 
 			table_row_object = table.rows[i];
 			
 			threshold_value = table.rows[i].cells[threshold_column].innerHTML;
-			console.log(threshold_value);
+			console.log(api_id);
 
 			use_api(api_id,table_data_object, table_row_object, threshold_value);
 			
 			
 		}
 	} 
-    update_table(class_name)
-    console.log("hello")
-	setInterval(update_table, 1000, class_name)
+    update_table()
+	setInterval(update_table, 1000)
 
 </script>
 

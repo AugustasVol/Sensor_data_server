@@ -16,21 +16,21 @@ head_send = head[0:4] # no port
 @app.route("/", methods = ["GET"])
 def index():
         
-    return render_template("page.html",table = table_df[head_send].to_html(index=False))
+    return render_template("page.html", dataframe=table_df[head_send])
 
 
 
 @app.route('/<id>', methods = ['GET'])
 def return_values(id):
 
-    data = {"data":500}	
+    data = {"data":100}	
     return jsonify(data)
 
 
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 
   
