@@ -7,8 +7,14 @@
 
 <style>
 
+body {
+  height: 100%;
+  margin: 10;
+}
+
 
 h1 {
+	color: gray;
     font-family: arial;
     font-size:300%;
     text-align: center;
@@ -17,7 +23,7 @@ p#alert {
     font-family: arial;
     font-size:300%;
     text-align:center;
-    margin-top:30px;
+    margin:1%;
 }
 button {
     border: none;
@@ -30,13 +36,13 @@ button {
     border-radius: 4px;
 }
 .hide_button {
-	font-size: 150%;
-	height: 10%;
-	width: 100%;
+	font-size: 100%;
+	height: 7%;
+	width: 98%;
     background-color: gray; 
     color: white; 
-    border: 2px solid gray;
-    margin: 10px 1px;
+    border: 1% solid gray;
+    margin: 1% 1%;
 }
 .hide_button:hover {
     background-color: white;
@@ -56,24 +62,25 @@ button {
 }
 
 input {
-	margin: 10px 1px;
+	margin: 1% 1%;
 	text-align: center;
-	font-size: 130%;
-	width: 100%;
-	height: 10%;
+	font-size: 100%;
+	width: 98%;
+	height: 5%;
 	transition: width 0.4s ease-in-out;
 }
 
 
 table {
-	font-size: 150%;
     font-family: arial, sans-serif;
     border-collapse: collapse;
     width: 100%;
+    height: 100%;
 }
 
 
 td, th {
+	font-size: 110%;
 	padding: 10;
     text-align: center;
     border-bottom: 1px solid #ddd;
@@ -96,6 +103,7 @@ td, th {
 
 <p id="alert"></p>
 <!-- tables done with jinja2 -->
+<div "style{height:100%}">
 <table id="dataframe">
 	<thead>
 		
@@ -120,13 +128,17 @@ td, th {
 		{% endfor %}
 	</tbody>
 </table>
-
+</div>
+{%set name_column = dataframe.columns[1]%}
+{%set threshold_column = dataframe.columns[-2]%}
 <div class="hidden" hidden>
-<input type="number" id="hidden_input" placeholder="Number">
+<input type="number" id="threshold_input" placeholder="{{threshold_column}}">
+
+<input id="name_input" placeholder="{{name_column}}">
 </div>
 
-{%set threshold_column = dataframe.columns[-2]%}
-<button class="hide_button" onclick="$('.hidden').toggle()">Change {{threshold_column}}</button>
+
+<button class="hide_button" onclick="$('.hidden').toggle()">Change</button>
 
 
 
@@ -141,37 +153,42 @@ td, th {
 	const id_column = 0;
 	const name_column = 1;
 
-	//var id_array = [];
-	//for (i = 1; i < row_length; ++i) {
-	//	id_array.push(table.rows[i].cells[id_column].innerHTML)
-	//}
-	//console.log(id_array)
-	hidden_input_id = "hidden_input"
-	hidden_input_object = document.getElementById(hidden_input_id)
-	function show_or_hide(id) {
+	threshold_input_id = "threshold_input"
+	name_input_id = "name_input"
+	threshold_input_object = document.getElementById(threshold_input_id)
+	name_input_object = document.getElementById(name_input_id)
 
-	} 
+
 	function get_and_change(id) {
-		value = Number(hidden_input_object.value);
-		console.log(value);
-		change_threshold(value, id);
+		const name_value = name_input_object.value;
+		const threshold_value = Number(threshold_input_object.value);
+		name_input_object.value = "";
+		threshold_input_object.value = "";
+		if ((name_value != "") && (threshold_value == 0)) {
+			change_table_server(name_value, name_column, id);
+		}
+		else if ((name_value == "") && (threshold_value != 0)) {
+			change_table_server(threshold_value, threshold_column, id);
+		}
+		else if ((name_value != "") && (threshold_value != 0)) {
+			change_table_server(name_value, name_column, id);
+			change_table_server(threshold_value, threshold_column, id);
+		}
 	}
-	function change_threshold(threshold_value, id) {
+	function change_table_server(value,column_int, id) {
 		var table_id = "undefined";
 		var table_row = "undefined";
 		for (i = 1;(table_id != id) && (i < row_length); ++i) {
-			console.log(table_id);
-			console.log(table_row);
+
 			table_row = table.rows[i]
 			table_id = table_row.cells[id_column].innerHTML
 		}
-		table_row.cells[threshold_column].innerHTML = threshold_value
-
+		table_row.cells[column_int].innerHTML = value;
+		use_api_get_value(id,table_row.cells[value_column], table_row, Number(table_row.cells[threshold_column].innerHTML));
+		use_api_post_value(id, table.rows[0].cells[column_int].innerHTML, value);
 	}
 	function change_value_color(value,table_data_object, table_row_object, threshold_value) {
-		console.log(value);
 		table_data_object.innerHTML = value;
-
 		if (value < threshold_value) {
 				table_row_object.style.backgroundColor = table_cell_color;
 			}
@@ -179,7 +196,18 @@ td, th {
 				table_row_object.style.backgroundColor = "initial";
 			}
 	}
-    function use_api(id,table_data_object, table_row_object, threshold_value) {
+	function use_api_post_value(id, column_name, value) {
+		$.ajax({
+			type:"POST",
+			url: document.URL + id,
+			data: JSON.stringify({"column":column_name, "value":value},null, '\t'),
+			contentType: 'application/json;charset=UTF-8',
+			success : function(data){
+                console.log(data);
+            } 
+		})
+	}
+    function use_api_get_value(id,table_data_object, table_row_object, threshold_value) {
         $.ajax({
         	type: "GET",
         	url: document.URL +id, 
@@ -198,7 +226,6 @@ td, th {
 
 	function update_table(){
 
-
 		for (i = 1; i < row_length; i++) {
 			api_id = table.rows[i].cells[id_column].innerHTML;
 
@@ -207,15 +234,14 @@ td, th {
 			table_row_object = table.rows[i];
 			
 			threshold_value = table.rows[i].cells[threshold_column].innerHTML;
-			console.log(api_id);
 
-			use_api(api_id,table_data_object, table_row_object, threshold_value);
+			use_api_get_value(api_id,table_data_object, table_row_object, threshold_value);
 			
 			
 		}
-	} 
+	}
     update_table()
-	setInterval(update_table, 1000)
+	//setInterval(update_table, 3000)
 
 </script>
 
