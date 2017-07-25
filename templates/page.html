@@ -80,8 +80,8 @@ table {
 
 
 td, th {
-	font-size: 110%;
-	padding: 10;
+	font-size: 130%;
+	padding: 5;
     text-align: center;
     border-bottom: 1px solid #ddd;
 
@@ -97,20 +97,23 @@ td, th {
 
 <body>
 
-<h1>Sensor data</h1>
+<h1>{{heading}}</h1>
 
 
 
-<p id="alert"></p>
+<p id="alert" hidden>{{refresh_name}}</p>
+<input class="hidden"  type="range" id="slider_table" min=50 max=150 oninput="change_height('slider_table','dataframe')" defaultValue=100 hidden>
 <!-- tables done with jinja2 -->
-<div "style{height:100%}">
+<div>
+
 <table id="dataframe">
+
 	<thead>
 		
 		{% for header in dataframe.columns %}
 			<th>{{header}}</th>
 		{% endfor %}
-		<th class="hidden" hidden>Change</th>
+		<th class="hidden" hidden>{{change_name}}</th>
 	</thead>
 	<tbody>
 		{% for row in dataframe.values %}
@@ -129,8 +132,10 @@ td, th {
 	</tbody>
 </table>
 </div>
+
 {%set name_column = dataframe.columns[1]%}
 {%set threshold_column = dataframe.columns[-2]%}
+
 <div class="hidden" hidden>
 <input type="number" id="threshold_input" placeholder="{{threshold_column}}">
 
@@ -138,7 +143,7 @@ td, th {
 </div>
 
 
-<button class="hide_button" onclick="$('.hidden').toggle()">Change</button>
+<button class="hide_button" onclick="$('.hidden').toggle()">{{change_name}}</button>
 
 
 
@@ -158,12 +163,15 @@ td, th {
 	threshold_input_object = document.getElementById(threshold_input_id)
 	name_input_object = document.getElementById(name_input_id)
 
-
+	function change_height(id_in, id_out) {
+		value = document.getElementById(id_in).value;
+		document.getElementById(id_out).style.height = value.toString() + "%";
+	}
 	function get_and_change(id) {
 		const name_value = name_input_object.value;
 		const threshold_value = Number(threshold_input_object.value);
-		name_input_object.value = "";
-		threshold_input_object.value = "";
+		name_input_object.value = ""; //clear input
+		threshold_input_object.value = ""; //clear unput
 		if ((name_value != "") && (threshold_value == 0)) {
 			change_table_server(name_value, name_column, id);
 		}
@@ -185,7 +193,7 @@ td, th {
 		}
 		table_row.cells[column_int].innerHTML = value;
 		use_api_get_value(id,table_row.cells[value_column], table_row, Number(table_row.cells[threshold_column].innerHTML));
-		use_api_post_value(id, table.rows[0].cells[column_int].innerHTML, value);
+		use_api_post_value(id, column_int, value);
 	}
 	function change_value_color(value,table_data_object, table_row_object, threshold_value) {
 		table_data_object.innerHTML = value;
@@ -196,11 +204,11 @@ td, th {
 				table_row_object.style.backgroundColor = "initial";
 			}
 	}
-	function use_api_post_value(id, column_name, value) {
+	function use_api_post_value(id, column_number, value) {
 		$.ajax({
 			type:"POST",
 			url: document.URL + id,
-			data: JSON.stringify({"column":column_name, "value":value},null, '\t'),
+			data: JSON.stringify({"column":column_number, "value":value},null, '\t'),
 			contentType: 'application/json;charset=UTF-8',
 			success : function(data){
                 console.log(data);
@@ -218,8 +226,7 @@ td, th {
         	},
 
         	error: function() {
-                var alert = document.getElementById("alert")
-                alert.innerHTML = "Refresh"
+                $("#alert").show()
         	}
         })
     }
@@ -234,6 +241,7 @@ td, th {
 			table_row_object = table.rows[i];
 			
 			threshold_value = table.rows[i].cells[threshold_column].innerHTML;
+			console.log(threshold_value)
 
 			use_api_get_value(api_id,table_data_object, table_row_object, threshold_value);
 			
@@ -241,7 +249,7 @@ td, th {
 		}
 	}
     update_table()
-	//setInterval(update_table, 3000)
+	setInterval(update_table, 1000)
 
 </script>
 
