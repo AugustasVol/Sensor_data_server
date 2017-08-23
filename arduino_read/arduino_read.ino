@@ -1,17 +1,7 @@
-/* This example shows how to get single-shot range
- measurements from the VL53L0X. The sensor can optionally be
- configured with different ranging profiles, as described in
- the VL53L0X API user manual, to get better performance for
- a certain application. This code is based on the four
- "SingleRanging" examples in the VL53L0X API.
-
- The range readings are in units of mm. */
-
 #include <Wire.h>
 #include <VL53L0X.h>
 
 VL53L0X sensor;
-
 
 // Uncomment this line to use long range mode. This
 // increases the sensitivity of the sensor and extends its
@@ -30,15 +20,25 @@ VL53L0X sensor;
 //#define HIGH_SPEED
 //#define HIGH_ACCURACY
 
-const char id[] = "aab"; //change the ID
+const char id[] = "aaa"; //change the ID !!!
 
-const char id_get = 'i'; //id
+const char id_get = 'i'; //id char to send to get
 
-const char distance_get = 'g'; //get
+const char distance_get = 'g'; //get char to send  to get
+
+const int init_pin = 9; //pin for initialization of sensor
+//pin 9 to pin INT (on CJMCU 530 sensor module), it is required for the sensor to start working
+//connect like usual i2c
 
 void setup()
 {
   Serial.begin(38400);
+  
+  pinMode(init_pin,OUTPUT);
+  digitalWrite(init_pin, HIGH);
+  delay(1);
+  digitalWrite(init_pin,LOW);
+
   Wire.begin();
 
   sensor.init();Serial.print("done");
