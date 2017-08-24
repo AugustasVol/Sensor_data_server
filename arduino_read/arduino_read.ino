@@ -20,15 +20,17 @@ VL53L0X sensor;
 //#define HIGH_SPEED
 //#define HIGH_ACCURACY
 
-const char id[] = "aaa"; //change the ID !!!
+const char id[] = "aaa"; //change the ID
 
-const char id_get = 'i'; //id char to send to get
+const char id_get = 'i'; //id
 
-const char distance_get = 'g'; //get char to send  to get
+const char distance_get = 'g'; //get
 
-const int init_pin = 9; //pin for initialization of sensor
+const int init_pin = 9;
 //pin 9 to pin INT (on CJMCU 530 sensor module), it is required for the sensor to start working
 //connect like usual i2c
+
+const int check_times = 10;
 
 void setup()
 {
@@ -79,7 +81,7 @@ void respond_distance() {
   int divide = 0;
   int number = 0;
   int temp_number;
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < check_times; ++i) {
     temp_number = read_distance();
     if (temp_number != 0) {
       number = number + temp_number;
@@ -106,3 +108,4 @@ void loop() {
     }
   }
 }
+

@@ -197,7 +197,7 @@ td, th {
 	}
 	function change_value_color(value,table_data_object, table_row_object, threshold_value) {
 		table_data_object.innerHTML = value;
-		if (value < threshold_value) {
+        if (value > threshold_value) {
 				table_row_object.style.backgroundColor = table_cell_color;
 			}
 		else {
