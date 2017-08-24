@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask, jsonify, request, render_template
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from random import randrange
 import helper
 import os
@@ -10,9 +10,11 @@ CORS(app)
 
 
 table_path = "table.csv"
-lang = helper.language()
-table = helper.table_class(table_path, table_column_names=lang.table_column_names)
+lang = helper.language(lang = "lt")
 sensors = helper.sensor_data()
+table = helper.table_class(sensor_list = sensors.sensor_list,
+                           table_path = table_path,
+                           table_column_names=lang.table_column_names)
 
 
 
@@ -41,4 +43,4 @@ def return_values(id):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
+    app.run(host='0.0.0.0', port=5000, debug=False, threaded=False)

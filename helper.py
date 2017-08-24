@@ -20,6 +20,7 @@ class language:
 
 class table_class:
     def __init__(self,
+                 sensor_list = [],
                  table_path = "table.csv", 
                  table_column_names = [0,1,2,3]):
         '''column[0] id
@@ -30,8 +31,28 @@ class table_class:
 
         self.table_path = table_path
         self.table_column_names = table_column_names
-        self.id_column= 0
-    
+
+        try:
+            new_sensors = []
+            df = pd.read_csv(self.table_path, header = None, names = None)
+            for id in sensor_list:
+                if (id in df[0].tolist()) == False:
+                    new_sensors.append(id)
+
+            size_new_sensors_zeroes = [0] * len(new_sensors)
+            new_df_data = {0:df[0].tolist() + new_sensors,
+                           1:df[1].tolist() + new_sensors,
+                           2:df[2].tolist() + size_new_sensors_zeroes,
+                           3:df[3].tolist() + size_new_sensors_zeroes}
+      
+        except:
+            new_df_data = {0:sensor_list,
+                           1:sensor_list,
+                           2:[0] * len(sensor_list),
+                           3:[0] * len(sensor_list)}
+
+        pd.DataFrame(new_df_data).to_csv(self.table_path, header=None, index=None)
+
     def send_df(self):
         df = pd.read_csv(self.table_path,header = None, names = self.table_column_names)
         print(df)
@@ -40,12 +61,12 @@ class table_class:
 
 
     def update_table(self, id, column_number, value):
+        print(id,column_number, value)
         df = pd.read_csv(self.table_path,header = None, names = None)
-        index = df[df[self.id_column] == id].index[0] #get row index
+        print(df)
+        index = df[df[0] == id].index[0] #get row index
         df.iloc[index, column_number] = value #change table value
         df.to_csv(self.table_path, index = None, header=None)
-
-       
 
 class sensor:
     def __init__(self,
@@ -80,6 +101,8 @@ class sensor_data:
         for file in serial_files:
             sense = sensor(path_name + file)
             self.sensors[sense.id] = sense
+
+        self.sensor_list = list(self.sensors.keys())
 
     def get(self, id):
         try:
